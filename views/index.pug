@@ -1,0 +1,81 @@
+extends layout
+
+block content
+  h1= title
+  hr
+  p Choose result type:
+  form
+    input(type="radio", name="endPoint", value="position", onclick="app.getResult()",  checked) 
+    |  Position  
+    input(type="radio", name="endPoint", value="object", onclick="app.getResult()") 
+    |  Object  
+    input(type="radio", name="endPoint", value="names", onclick="app.getResult()") 
+    |  Cities (in the same PLZ lead region)
+    input(id="csrf", type="hidden", name="_csrf" value=`${csrfToken}`)
+    input(id="proxy", type="hidden", name="_proxy" value=`${proxyFullPath}`)
+  p Choose postcode:
+  multiselect(id="zip", v-model="selected", :options="options", placeholder="Enter PLZ", @input="getResult", @search-change="getOptionsAsync")
+  br
+  br
+  textarea(id="result", readonly="true", placeholder="Result", rows="10", class="multiselect__input multiselect__tags")
+
+  script.
+    var app = new Vue({
+      el: '#zip',
+      components: { 'Multiselect': VueMultiselect.default },
+      data () {
+        return {
+          selected: null,
+          options: [],
+          proxy: document.getElementById('proxy').value,
+          csrf: document.getElementById('csrf').value,
+        };
+      },
+      methods: {
+        getResult() { 
+          var resultTextArea = document.getElementById('result');
+          resultTextArea.value = '';
+
+          if (this.selected) {
+            var url = '';
+            var postcode = '';
+            var leadRegion = '';
+            var endPoint = document.querySelector('input[name = endPoint]:checked').value;
+            
+            switch(endPoint) {
+              case 'names':
+                leadRegion = encodeURIComponent(this.selected).substring(0,2)
+                url = `${this.proxy}?endPoint=${endPoint}&leadRegion=${leadRegion}&_csrf=${this.csrf}`;
+                break;
+              case 'position':
+              case 'object':
+                postcode = encodeURIComponent(this.selected).substring(0,5);
+                url = `${this.proxy}?endPoint=${endPoint}&postcode=${postcode}&_csrf=${this.csrf}`;
+                break;
+              default:
+                url = this.proxy;
+            }
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", url, true);
+            xhr.onload = function() {
+              resultTextArea.value = xhr.responseText;
+            };
+            xhr.send();
+          }
+        },
+        getOptionsAsync(currentInput) {
+          if(currentInput.length === 2) {
+            var url = `${this.proxy}?endPoint=names&leadRegion=${currentInput}&_csrf=${this.csrf}`;
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", url, true);
+            xhr.onload = function() {
+              app.options = JSON.parse(xhr.responseText); 
+            };
+            xhr.send(); 
+          }
+        },
+      },
+    });
+
