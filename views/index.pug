@@ -65,7 +65,7 @@ block content
           }
         },
         getOptionsAsync(currentInput) {
-          if(currentInput.length === 2) {
+          if(currentInput.length === 2 && !isNaN(currentInput)) {
             var url = `${this.proxy}?endPoint=names&leadRegion=${currentInput}&_csrf=${this.csrf}`;
 
             var xhr = new XMLHttpRequest();
