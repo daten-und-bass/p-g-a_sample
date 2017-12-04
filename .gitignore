@@ -3,7 +3,6 @@
 **/.DS_Store
 **/.sublime-project
 **/.sublime-workspace
-*/custom-environment-variables.js
 */config_production.js
 */**/config_production.js
 
