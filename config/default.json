@@ -10,13 +10,21 @@
       "key": ""
     },
     "proxy": {
-      "basePath": "/proxy",
-      "subPath": "/v1/de/postcodes"
+      "basePath": "/proxy/v1",
+      "subPath": "/de/postcodes"
     },
     "api": {
-      "address": "https://p-g-a.daten-und-bass.io/api/v1/de/postcodes",
-      "docs": "https://p-g-a.daten-und-bass.io/api/v1",
-      "token": ""
+      "host": "https://p-g-a.daten-und-bass.io",
+      "basePath": "/api/v1",
+      "subPath": "/de/postcodes",
+      "accesstokenPath": "/accesstoken",
+      "docs": "/api/v1",
+      "oauth": {
+        "grant_type": "client_credentials",
+        "client_id": "",
+        "client_secret": "",
+        "scope": "read:pc"
+      }
     }
   }
 }

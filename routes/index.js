@@ -14,7 +14,7 @@ let webConfig = config.get('web');
 /* GET "PGA - Sample" and render index page. */
 router.get('/', csrfProtection, function(req, res, next) {
   res.render('index', { 
-  	title: 'Postcode Geopos API - Sample',
+  	title: 'Postcode-Geopos-API - Sample',
   	csrfToken: req.csrfToken(),
   	proxyFullPath: `${webConfig.basePath}${webConfig.proxy.basePath}${webConfig.proxy.subPath}`,
   });
