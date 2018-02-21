@@ -1,34 +1,58 @@
 extends layout
 
 block content
-  h1= title
-  hr
-  p Choose result type:
-  form
-    input(type="radio", name="endPoint", value="position", onclick="app.getResult()",  checked) 
-    |  Position  
-    input(type="radio", name="endPoint", value="object", onclick="app.getResult()") 
-    |  Object  
-    input(type="radio", name="endPoint", value="names", onclick="app.getResult()") 
-    |  Cities (in the same PLZ lead region)
-    input(id="csrf", type="hidden", name="_csrf" value=`${csrfToken}`)
-    input(id="proxy", type="hidden", name="_proxy" value=`${proxyFullPath}`)
-  p Choose postcode:
-  multiselect(id="zip", v-model="selected", :options="options", placeholder="Enter PLZ", @input="getResult", @search-change="getOptionsAsync")
+  div(id="app")
+    p Choose result type:
+    form
+      span(:title="titles.position", style="margin-right:10px; cursor: default;")
+        input(id="position", type="radio", name="endPoint", value="position", onclick="app.getResult()",  checked) 
+        | 
+        label(for="position") Position   
+      |
+      span(:title="titles.object", style="margin-right:10px; cursor: default;")
+        input(id="object", type="radio", name="endPoint", value="object", onclick="app.getResult()") 
+        | 
+        label(for="object") Object   
+      span(:title="titles.cities", style="margin-right:10px; cursor: default;")
+        input(id="cities", type="radio", name="endPoint", value="names", onclick="app.getResult()") 
+        | 
+        label(for="cities") Cities   
+      span(:title="titles.distance", style="cursor: default;") 
+        input(id="distance", type="radio", name="endPoint", value="distance", :title="titles.distance", onclick="app.getResult()") 
+        | 
+        label(for="distance") Distance 
+      select(id="unit", v-if="multiple === true", :title="titles.unit", onchange="app.getResult()")
+        option(value="m",  selected) Meter
+        option(value="km") Kilometer
+        option(value="ft") Feet
+        option(value="mi") Miles
+      input(id="csrf", type="hidden", name="_csrf" value=`${csrfToken}`)
+      input(id="proxy", type="hidden", name="_proxy" value=`${proxyFullPath}`)
+    p Choose postcode:
+    multiselect(id="zip", title="The postcode (PLZ - Postleitzahl) of interest, e.g. 45130", v-model="selected", :options="options", :multiple="multiple", :max="max", placeholder="Enter PLZ", @input="getResult", @search-change="getOptionsAsync")
   br
   br
   textarea(id="result", readonly="true", placeholder="Result", rows="10", class="multiselect__input multiselect__tags")
 
   script.
     var app = new Vue({
-      el: '#zip',
+      el: '#app',
       components: { 'Multiselect': VueMultiselect.default },
       data () {
         return {
           selected: null,
           options: [],
+          multiple: false,
+          max: false,
           proxy: document.getElementById('proxy').value,
           csrf: document.getElementById('csrf').value,
+          titles: {
+            position: "Returns the geoposition for one postcode",
+            object: "Returns a JSON object with details on the given postcode",
+            cities: "Returns all (city) names for all postcodes within the given lead region, e.g. 45",
+            distance: "Returns the linear distance in the given unit between the central points of the two given postcodes",
+            unit: "The unit to be used for the distance value (defaults to meter)",
+          }
         };
       },
       methods: {
@@ -36,26 +60,45 @@ block content
           var resultTextArea = document.getElementById('result');
           resultTextArea.value = '';
 
-          if (this.selected) {
             var url = '';
             var postcode = '';
             var leadRegion = '';
+            var start = '';
+            var end = '';
+            var unit = '';
             var endPoint = document.querySelector('input[name = endPoint]:checked').value;
             
             switch(endPoint) {
               case 'names':
+                this.multiple = false;
+                this.max = false;
                 leadRegion = encodeURIComponent(this.selected).substring(0,2)
                 url = `${this.proxy}?endPoint=${endPoint}&leadRegion=${leadRegion}&_csrf=${this.csrf}`;
                 break;
               case 'position':
               case 'object':
+                this.multiple = false;
+                this.max = false;
                 postcode = encodeURIComponent(this.selected).substring(0,5);
                 url = `${this.proxy}?endPoint=${endPoint}&postcode=${postcode}&_csrf=${this.csrf}`;
+                break;
+              case 'distance':
+                this.multiple = true;
+                this.max = 2;
+                if(Array.isArray(this.selected) === true) {
+                  start = encodeURIComponent(this.selected[0]).substring(0,5);
+                  end = encodeURIComponent(this.selected[1]).substring(0,5);
+                  unit = document.getElementById("unit").options[document.getElementById("unit").selectedIndex].value;
+                  url = `${this.proxy}?endPoint=${endPoint}&start=${start}&end=${end}&unit=${unit}&_csrf=${this.csrf}`;
+                }
                 break;
               default:
                 url = this.proxy;
             }
-
+          if(this.selected && document.querySelector('input[name = endPoint]:checked').value === 'names' ||
+              this.selected && document.querySelector('input[name = endPoint]:checked').value === 'position' ||
+              this.selected && document.querySelector('input[name = endPoint]:checked').value === 'object' ||
+              Array.isArray(this.selected) === true && this.selected.length === 2 && document.querySelector('input[name = endPoint]:checked').value === 'distance') {
             var xhr = new XMLHttpRequest();
             xhr.open("GET", url, true);
             xhr.onload = function() {

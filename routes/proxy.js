@@ -38,6 +38,9 @@ router.get(`${webConfig.proxy.subPath}`, parseForm, csrfProtection, function(req
     case 'object':  
       url = `${baseUrl}/${req.query.endPoint}/${req.query.postcode}`;
       break;
+    case 'distance':
+      url = `${baseUrl}/${req.query.endPoint}?start=${req.query.start}&end=${req.query.end}&unit=${req.query.unit}`;
+      break;
     default:
       url = webConfig.api.docs;
   }

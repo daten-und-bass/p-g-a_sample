@@ -2,16 +2,58 @@ doctype html
 html
   head
     title= title
-    //- script(type="text/javascript" src="https://unpkg.com/vue")
     script(type="text/javascript" src="javascripts/vue.min.js")
     script(type="text/javascript" src="javascripts/vue-multiselect.min.js")
     link(rel="stylesheet", href="stylesheets/style.css")
     link(rel="stylesheet" href="stylesheets/vue-multiselect.min.css")
     link(rel="icon" href="favicon.ico" type="image/x-icon")
   body
+    p(style="margin-bottom: 0px; font-size: 12px; color:rgb(118,118,119);") An
+      | 
+      a(href="https://github.com/daten-und-bass/postcode-geopos-api", target="_blank", class="pga-link--plain") open source 
+      | 
+      a(href="https://nodejs.org/", target="_blank", class="pga-link--plain") NodeJS
+      |  API based on 
+      | 
+      a(href="https://swagger.io/", target="_blank", class="pga-link--plain") Swagger/openAPI
+      |  for retrieving geolocations from 
+      | 
+      a(href="https://en.wikipedia.org/wiki/Postal_codes_in_Germany/", target="_blank", class="pga-link--plain") German postcodes (PLZ)
+      |  stored in 
+      | 
+      a(href="https://redis.io", target="_blank", class="pga-link--plain") Redis.
+    h2
+      a(href="https://p-g-a.daten-und-bass.io/docs/", target="_blank", class="pga-link--plain")= title
+    p(style="margin-bottom: 0px; text-align: right; font-size: 12px; color:rgb(118,118,119);") 
+      | 
+      a(href="https://daten-und-bass.io/blog/data-modeling-with-redis-german-postcodes-geoposition/", target="_blank", class="pga-link--plain") about
+      |  | 
+      a(href="https://p-g-a.daten-und-bass.io/docs/", target="_blank", class="pga-link--plain") docs
+      |  | github[ 
+      a(href="https://github.com/daten-und-bass/", target="_blank", class="pga-link--plain") d&b
+      |  -  
+      a(href="https://github.com/daten-und-bass/postcode-geopos-api", target="_blank", class="pga-link--plain") pga
+      |  -  
+      a(href="https://github.com/daten-und-bass/p-g-a_sample", target="_blank", class="pga-link--plain") sample 
+      |]
+    hr(style="margin-top: 2px;")
     block content
   footer
     br
     hr(style="margin-bottom: 2px;")
     p(style="margin-top: 0px; text-align: left; font-size: 12px; color:rgb(118,118,119);") This sample uses a cookie to sign your API request.
-      span(style="float:right; font-size: 12px; color:rgb(118,118,119);") daten&amp;bass 2017
+      span(style="float:right; font-size: 12px; color:rgb(118,118,119);") 
+        a(href="https://daten-und-bass.io/", target="_blank", class="pga-link--plain") daten&amp;bass 
+        | | 
+        a(href="https://daten-und-bass.io/en/imprint", target="_blank", class="pga-link--plain") imprint
+
+
+style(type="text/css").
+  .pga-link--plain {
+    color: inherit !important; 
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }

@@ -61,7 +61,7 @@ describe('/p-g-a', function() {
       });
     });
 
-    it('should respond with 401 for missing csrf token', function(done) {
+    it('should respond with 403 for missing csrf token', function(done) {
       request({
         url: `${proxyUrl}`,
         method: 'GET',
@@ -78,7 +78,7 @@ describe('/p-g-a', function() {
       });
     });
 
-    it('should respond with 200 for wrong csrf token', function(done) {
+    it('should respond with 403 for wrong csrf token', function(done) {
       request({
         url: `${proxyUrl}?_csrf=wrongToken'`,
         method: 'GET',
