@@ -39,7 +39,7 @@ router.get(`${webConfig.proxy.subPath}`, parseForm, csrfProtection, function(req
 
       } else if (req.query.namesPattern && ! req.query.leadRegion) {
 
-        url = `${baseUrl}/${req.query.endPoint}?namesPattern=${req.query.namesPattern}`;
+        url = `${baseUrl}/${req.query.endPoint}?namesPattern=${encodeURIComponent(req.query.namesPattern)}`;
         
       } else {
 
