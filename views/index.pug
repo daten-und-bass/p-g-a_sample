@@ -5,36 +5,36 @@ block content
     p Choose result type:
     form
       span(:title="titles.position", style="margin-right:10px; cursor: default;")
-        input(id="position", type="radio", name="endPoint", value="position", onclick="app.getResult()",  checked) 
+        input(id="position", type="radio", name="endPoint", v-model="resultType", value="position", v-on:click="getResult(selected)",  checked) 
         | 
         label(for="position") Position   
       |
       span(:title="titles.object", style="margin-right:10px; cursor: default;")
-        input(id="object", type="radio", name="endPoint", value="object", onclick="app.getResult()") 
+        input(id="object", type="radio", name="endPoint", v-model="resultType", value="object", v-on:click="getResult(selected)") 
         | 
         label(for="object") Object   
       span(:title="titles.cities", style="margin-right:10px; cursor: default;")
-        input(id="cities", type="radio", name="endPoint", value="names", onclick="app.getResult()") 
+        input(id="cities", type="radio", name="endPoint", v-model="resultType", value="names", v-on:click="getResult(selected)") 
         | 
         label(for="cities") Cities   
       span(:title="titles.distance", style="cursor: default;") 
-        input(id="distance", type="radio", name="endPoint", value="distance", :title="titles.distance", onclick="app.getResult()") 
+        input(id="distance", type="radio", name="endPoint", v-model="resultType", value="distance", :title="titles.distance", v-on:click="getResult(selected)") 
         | 
         label(for="distance") Distance 
-      select(id="unit", v-if="multiple === true", :title="titles.unit", onchange="app.getResult()")
-        option(value="m",  selected) Meter
+      select(id="unit", v-if="multiple === true", :title="titles.unit", v-model="distanceUnit", v-on:change="getResult(selected)")
+        option(value="m") Meter
         option(value="km") Kilometer
         option(value="ft") Feet
         option(value="mi") Miles
-      input(id="csrf", type="hidden", name="_csrf" value=`${csrfToken}`)
-      input(id="proxy", type="hidden", name="_proxy" value=`${proxyFullPath}`)
     p Choose postcode:
-    multiselect(id="zip", title="The postcode (PLZ - Postleitzahl) of interest, e.g. 45130", v-model="selected", :options="options", :multiple="multiple", :max="max", placeholder="Enter PLZ", @input="getResult", @search-change="getOptionsAsync")
-  br
-  br
-  textarea(id="result", readonly="true", placeholder="Result", rows="10", class="multiselect__input multiselect__tags")
+    multiselect(id="zip", :title="titles.multiSelInput", v-model="selected", :options="options", :multiple="multiple", :max="max", :placeholder="placeholder", @search-change="getOptions", @input="getResult")
+    br
+    br
+    textarea(id="result", readonly="false", placeholder="Result", v-model="result", :value="result" rows="10", class="multiselect__input multiselect__tags")
 
   script.
+    'use strict'
+
     var app = new Vue({
       el: '#app',
       components: { 'Multiselect': VueMultiselect.default },
@@ -44,79 +44,97 @@ block content
           options: [],
           multiple: false,
           max: false,
-          proxy: document.getElementById('proxy').value,
-          csrf: document.getElementById('csrf').value,
+          placeholder: 'Enter PLZ or city',
           titles: {
-            position: "Returns the geoposition for one postcode",
-            object: "Returns a JSON object with details on the given postcode",
-            cities: "Returns all (city) names for all postcodes within the given lead region, e.g. 45",
-            distance: "Returns the linear distance in the given unit between the central points of the two given postcodes",
-            unit: "The unit to be used for the distance value (defaults to meter)",
-          }
+            position: 'Returns the geoposition for one postcode',
+            object: 'Returns a JSON object with details on the given postcode',
+            cities: 'Returns all (city) names for all postcodes within the given lead region, e.g. 45',
+            distance: 'Returns the linear distance in the given unit between the central points of the two given postcodes',
+            unit: 'The unit to be used for the distance value (defaults to meter)',
+            multiSelInput: 'The city name or postcode (PLZ - Postleitzahl) of interest, e.g. 45130',
+          },
+          resultType: 'position',
+          distanceUnit: 'm',
+          result: '',
+          pga: {
+            proxy: `${!{JSON.stringify(proxyFullPath)}}`,
+            csrf: `${!{JSON.stringify(csrfToken)}}`,
+            options: {
+              url: '',
+            },
+            results: {
+              url: '',
+            },
+          },
         };
       },
       methods: {
-        getResult() { 
-          var resultTextArea = document.getElementById('result');
-          resultTextArea.value = '';
+        getOptions(currentInput) {
 
-            var url = '';
-            var postcode = '';
-            var leadRegion = '';
-            var start = '';
-            var end = '';
-            var unit = '';
-            var endPoint = document.querySelector('input[name = endPoint]:checked').value;
-            
-            switch(endPoint) {
-              case 'names':
-                this.multiple = false;
-                this.max = false;
-                leadRegion = encodeURIComponent(this.selected).substring(0,2)
-                url = `${this.proxy}?endPoint=${endPoint}&leadRegion=${leadRegion}&_csrf=${this.csrf}`;
-                break;
-              case 'position':
-              case 'object':
-                this.multiple = false;
-                this.max = false;
-                postcode = encodeURIComponent(this.selected).substring(0,5);
-                url = `${this.proxy}?endPoint=${endPoint}&postcode=${postcode}&_csrf=${this.csrf}`;
-                break;
-              case 'distance':
-                this.multiple = true;
-                this.max = 2;
-                if(Array.isArray(this.selected) === true) {
-                  start = encodeURIComponent(this.selected[0]).substring(0,5);
-                  end = encodeURIComponent(this.selected[1]).substring(0,5);
-                  unit = document.getElementById("unit").options[document.getElementById("unit").selectedIndex].value;
-                  url = `${this.proxy}?endPoint=${endPoint}&start=${start}&end=${end}&unit=${unit}&_csrf=${this.csrf}`;
-                }
-                break;
-              default:
-                url = this.proxy;
-            }
-          if(this.selected && document.querySelector('input[name = endPoint]:checked').value === 'names' ||
-              this.selected && document.querySelector('input[name = endPoint]:checked').value === 'position' ||
-              this.selected && document.querySelector('input[name = endPoint]:checked').value === 'object' ||
-              Array.isArray(this.selected) === true && this.selected.length === 2 && document.querySelector('input[name = endPoint]:checked').value === 'distance') {
-            var xhr = new XMLHttpRequest();
-            xhr.open("GET", url, true);
-            xhr.onload = function() {
-              resultTextArea.value = xhr.responseText;
-            };
-            xhr.send();
-          }
-        },
-        getOptionsAsync(currentInput) {
           if(currentInput.length === 2 && !isNaN(currentInput)) {
-            var url = `${this.proxy}?endPoint=names&leadRegion=${currentInput}&_csrf=${this.csrf}`;
+            this.pga.options.url = `${this.pga.proxy}?endPoint=names&leadRegion=${encodeURIComponent(currentInput)}&_csrf=${this.pga.csrf}`;
 
             var xhr = new XMLHttpRequest();
-            xhr.open("GET", url, true);
+            xhr.open('GET', this.pga.options.url, true);
+            xhr.onload = function() {
+              app.options = JSON.parse(xhr.responseText);
+            };
+            xhr.send(); 
+          }
+
+          if(currentInput.length === 4 && currentInput.match(/[0-9\sa-zA-ZäAöÖüÜß]{4,4}/)) {
+            this.pga.options.url = `${this.pga.proxy}?endPoint=names&namesPattern=${encodeURIComponent(currentInput)}&_csrf=${this.pga.csrf}`;
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', this.pga.options.url, true);
             xhr.onload = function() {
               app.options = JSON.parse(xhr.responseText); 
             };
             xhr.send(); 
+          }
+        },
+        getResult(currentInput) { 
+
+          this.result = '';
+
+          switch(this.resultType) {
+
+            case 'names':
+              this.multiple = false;
+              this.max = false;
+              this.pga.results.url = `${this.pga.proxy}?endPoint=${this.resultType}&leadRegion=${encodeURIComponent(currentInput).substring(0,2)}&_csrf=${this.pga.csrf}`;
+              break;
+
+            case 'position':
+            case 'object':
+              this.multiple = false;
+              this.max = false;
+              this.pga.results.url = `${this.pga.proxy}?endPoint=${this.resultType}&postcode=${encodeURIComponent(currentInput).substring(0,5)}&_csrf=${this.pga.csrf}`;
+              break;
+
+            case 'distance':
+              this.multiple = true;
+              this.max = 2;
+              if(Array.isArray(currentInput) === true) {
+                this.pga.results.url = `${this.pga.proxy}?endPoint=${this.resultType}&start=${encodeURIComponent(currentInput[0]).substring(0,5)}&end=${encodeURIComponent(currentInput[1]).substring(0,5)}&unit=${this.distanceUnit}&_csrf=${this.pga.csrf}`;
+              }
+              break;
+
+            default:
+              this.pga.results.url = this.pga.proxy;
+          }
+
+          if(currentInput && this.resultType === 'names' ||
+              currentInput && this.resultType === 'position' ||
+              currentInput && this.resultType === 'object' ||
+              Array.isArray(currentInput) === true && currentInput.length === 2 && this.resultType === 'distance') {
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', this.pga.results.url, true);
+            xhr.onload = function() {
+              app.result = xhr.responseText;
+            };
+            xhr.send();
           }
         },
       },

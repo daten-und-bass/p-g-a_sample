@@ -1,6 +1,6 @@
 {
   "name": "p-g-a-sample",
-  "version": "0.1.0",
+  "version": "0.2.1",
   "private": true,
   "description": "A sample client implementation for Postcode-Geopos-API - API for geolocations of German postcodes (PLZ)",
   "keywords": [

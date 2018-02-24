@@ -32,7 +32,19 @@ router.get(`${webConfig.proxy.subPath}`, parseForm, csrfProtection, function(req
 
   switch(req.query.endPoint) {
     case 'names':
-      url = `${baseUrl}/${req.query.endPoint}?leadRegion=${req.query.leadRegion}`;
+
+      if (req.query.leadRegion && ! req.query.namesPattern) {
+
+        url = `${baseUrl}/${req.query.endPoint}?leadRegion=${req.query.leadRegion}`;
+
+      } else if (req.query.namesPattern && ! req.query.leadRegion) {
+
+        url = `${baseUrl}/${req.query.endPoint}?namesPattern=${req.query.namesPattern}`;
+        
+      } else {
+
+        url = webConfig.api.docs
+      }
       break;
     case 'position':
     case 'object':  
