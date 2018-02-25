@@ -35,7 +35,7 @@ router.get(`${webConfig.proxy.subPath}`, parseForm, csrfProtection, function(req
 
       if (req.query.leadRegion && ! req.query.namesPattern) {
 
-        url = `${baseUrl}/${req.query.endPoint}?leadRegion=${req.query.leadRegion}`;
+        url = `${baseUrl}/${req.query.endPoint}?leadRegion=${encodeURIComponent(req.query.leadRegion)}`;
 
       } else if (req.query.namesPattern && ! req.query.leadRegion) {
 
@@ -51,7 +51,7 @@ router.get(`${webConfig.proxy.subPath}`, parseForm, csrfProtection, function(req
       url = `${baseUrl}/${req.query.endPoint}/${req.query.postcode}`;
       break;
     case 'distance':
-      url = `${baseUrl}/${req.query.endPoint}?start=${req.query.start}&end=${req.query.end}&unit=${req.query.unit}`;
+      url = `${baseUrl}/${req.query.endPoint}?start=${encodeURIComponent(req.query.start)}&end=${encodeURIComponent(req.query.end)}&unit=${encodeURIComponent(req.query.unit)}`;
       break;
     default:
       url = webConfig.api.docs;
