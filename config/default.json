@@ -9,6 +9,7 @@
       "pub": "",
       "key": ""
     },
+    "proxies": "",
     "proxy": {
       "basePath": "/proxy/v1",
       "subPath": "/de/postcodes"

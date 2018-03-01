@@ -22,6 +22,10 @@ let app = express();
 let httpsServer = https.createServer({key: webConfig.https.key, cert: webConfig.https.pub}, app);
 httpsServer.listen(webConfig.https.port);
 
+// app.set('trust proxy', webConfig.proxies);
+// throws "new TypeError('invalid IP address: ' + str);" if set to "false"
+// as described here: // http://expressjs.com/en/guide/behind-proxies.html
+
 app.set("forceSSLOptions", { httpsPort: webConfig.https.port });
 
 app.set('views', path.join(__dirname, 'views'));

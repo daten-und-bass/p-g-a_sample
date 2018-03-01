@@ -28,9 +28,12 @@ describe('p-g-a_sample', function() {
 
 describe('/p-g-a', function() {
   describe('get', function() {
+
+    this.timeout(9999);
     
     it('should respond with 200 Success', function(done) {
       request({
+        timeout: 9999,
         url: baseUrl,
         method: 'GET',
       },
@@ -47,6 +50,7 @@ describe('/p-g-a', function() {
 
     it('should respond with 404 Error for wrong path', function(done) {
       request({
+        timeout: 9999,
         url: `${baseUrl}/wrong-path`,
         method: 'GET',
       },
@@ -63,6 +67,7 @@ describe('/p-g-a', function() {
 
     it('should respond with 403 for missing csrf token', function(done) {
       request({
+        timeout: 9999,
         url: `${proxyUrl}`,
         method: 'GET',
       },
@@ -80,6 +85,7 @@ describe('/p-g-a', function() {
 
     it('should respond with 403 for wrong csrf token', function(done) {
       request({
+        timeout: 9999,
         url: `${proxyUrl}?_csrf=wrongToken'`,
         method: 'GET',
       },
