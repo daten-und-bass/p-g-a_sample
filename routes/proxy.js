@@ -10,7 +10,10 @@ const bodyParser = require('body-parser');
 
 const config = require('config');
 
-let csrfProtection = csrf({ cookie: true, ignoreMethods: [] });
+let csrfProtection = csrf({ 
+  cookie: { httpOnly: true, secure: true, sameSite: true}, 
+  ignoreMethods: [] 
+});
 let parseForm = bodyParser.urlencoded({ extended: false });
 
 let webConfig = config.get('web');

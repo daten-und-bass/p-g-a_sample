@@ -7,7 +7,7 @@ const csrf = require('csurf');
 
 const config = require('config');
 
-let csrfProtection = csrf({ cookie: true });
+let csrfProtection = csrf({ cookie: { httpOnly: true, secure: true, sameSite: true} });
 
 let webConfig = config.get('web');
 
